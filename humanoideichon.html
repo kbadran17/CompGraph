@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>niño de bracitos de helado</title>
+        <style>                                
+            html, body { margin: 0; padding: 0; overflow: hidden; }
+            #info {
+                position: absolute;
+                padding: 10px;
+                width: 100%;
+                text-align: center;
+                color: #FFFFFF;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="info">niño de bracitos de helado<br/>
+            Usar flecha arriba y abajo para trasladar.<br/>
+            Usar flechas laterales para rotar.<br/>
+			(Con respecto al avance correspondiente con la clase anterior, logré que el personaje rotara con respecto a su eje y no al del plano, sin embargo no encontré la forma de fijar el origen del kotzizI y kotzizR y tampocco de hombritoI y hombritoR)
+			
+
+        </div>
+    <script src="js/three.min.js"></script>
+
+    <script>
+	
+	
+var scene, aspect, camera,camarax, camaray, camaraz, renderer;
+var geometry1, geometry2;
+var tronquito, cuellito, hombritoR,hombritoI,muslitoR,muslitoI,rodillaI,rodillaR,pantoriillaI,pantoriillaR,bracitoL,bracitoR;
+
+var startTime = Date.now();
+
+
+			 
+
+var upArrow = false;
+var downArrow = false;
+var leftArrow = false;
+var rightArrow = false;
+var scaleUp = false;
+var scaleDown = false;
+var xAxis = true;
+var yAxis = false;
+var zAxis = false;
+
+var thetaSum=0;
+var positivo=false;
+
+init();
+animate();
+
+function init(){
+
+	
+	
+	
+scene = new THREE.Scene();
+            scene.background = new THREE.Color( 0xAAAAAA );
+aspect = window.innerWidth / window.innerHeight;
+camera = new THREE.PerspectiveCamera( 45, aspect, 0.1, 1000);
+
+renderer = new THREE.WebGLRenderer();
+renderer.setSize( window.innerWidth, window.innerHeight );
+document.body.appendChild( renderer.domElement );
+
+ 	
+//EVENTOS DE TECLADO
+
+var onKeyDown = function ( event ) {
+switch ( event.keyCode ) {
+case 38: // TRASLADAR ADELANTE
+upArrow = true;
+break;
+case 40: // TRASLADAR ATRÁS
+downArrow = true;
+break;
+case 83: // ESCALA AGRANDAR
+scaleUp = true;
+break;
+case 87: // ESCALA DISMINUIR
+scaleDown = true;
+break;
+case 37: // ROTAR CW
+leftArrow = true;
+break;
+case 39: // ROTAR CCW
+rightArrow = true;
+break;
+case 88: // SELECCIONAR EJE X DE ROTACION
+yAxis = false;
+zAxis = false;
+xAxis = true;
+break;
+case 89: // SELECCIONAR EJE Y DE ROTACION
+xAxis = false;
+zAxis = false;
+yAxis = true;
+break;
+case 90: // SELECCIONAR EJE Z DE 
+xAxis = false;
+yAxis = false;
+zAxis = true;
+break;
+}
+};	 
+ 	
+var onKeyUp = function ( event ) {
+switch ( event.keyCode ) {
+case 38: // TRASLADAR
+upArrow = false;
+break;
+case 40: // TRASLADAR
+downArrow = false;
+break;
+case 37: // ROTAR CW
+leftArrow = false;
+break;
+case 39: // ROTAR CCW
+rightArrow = false;
+break;
+case 83: // ESCALA AGRANDAR
+scaleUp = false;
+break;
+case 87: // ESCALA DISMINUIR
+scaleDown = false;
+break;
+}
+};	 	
+
+document.addEventListener( 'keydown', onKeyDown, false );
+document.addEventListener( 'keyup', onKeyUp, false );
+
+//ELEMENTOS DE ESCENA
+ 
+var size = 10;
+var arrowSize = 1;
+var divisions = size;
+var origin = new THREE.Vector3( 0, 0, 0 );
+var x = new THREE.Vector3( 1, 0, 0 );
+var y = new THREE.Vector3( 0, 1, 0 );
+ 	var z = new THREE.Vector3( 0, 0, 1 );
+var color1 = new THREE.Color( 0x8A0808);
+ 	var color2 = new THREE.Color( 0x00000 );
+            var color3 = new THREE.Color( 0x000000 );
+ 	var colorR = new THREE.Color( 0xAA0000 );
+ 	var colorG = new THREE.Color( 0x00AA00 );
+ 	var colorB = new THREE.Color( 0x0000AA );
+var colorRd = new THREE.Color( 0xAA6666 );
+ 	var colorGd = new THREE.Color( 0x66AA66 );
+ 	var colorBd = new THREE.Color( 0x6666AA );
+	var color8 = new THREE.Color( 0x6006AA );
+	
+	
+	
+ 
+ 	//CREAR LAS GRILLAS PARA EL ESCENARIO
+ 	var axesHelper1 = new THREE.AxesHelper( size/10 );
+var axesHelper2 = new THREE.AxesHelper( size/10 );
+var axesHelper3 = new THREE.AxesHelper( size/10 );
+ 	var gridHelperXY = new THREE.GridHelper( size, divisions, color1, color1);
+ 	var gridHelperXZ = new THREE.GridHelper( size, divisions, color2, color2 );
+ 	var gridHelperYZ = new THREE.GridHelper( size, divisions, color2, color2 );
+            
+            //ROTARLAS PARA QUE QUEDEN EN EL ESPACIO ADECUADO
+            gridHelperXY.rotateOnWorldAxis ( x, THREE.Math.degToRad(90) );
+            gridHelperXZ.rotateOnWorldAxis ( y, THREE.Math.degToRad(90) );
+            gridHelperYZ.rotateOnWorldAxis ( z, THREE.Math.degToRad(90) );
+            
+            //CREAR LAS FLECHAS QUE INDICAN LOS EJES DE COORDENADAS 3D
+            var arrowX = new THREE.ArrowHelper( x, origin, arrowSize, colorR );
+            var arrowY = new THREE.ArrowHelper( y, origin, arrowSize, colorG );
+            var arrowZ = new THREE.ArrowHelper( z, origin, arrowSize, colorB );
+
+var cuello = new THREE.Geometry();
+            var zTemp = 0;
+            var res = 60.0;
+            for( var i = 0; i < res; i++){
+                for( var j = 0; j < res; j++){
+                    var puntos = new THREE.Vector3();
+                    puntos.x = (0.8 + i / res ) * Math.cos( ( j *2.0 * Math.PI ) / res) ;
+                    puntos.y = 11.5+(2.0 * (i / res));
+                    puntos.z = (1.0 +  i / res ) * Math.sin( ( j * 2.0 * Math.PI ) / res) ;
+                    
+                    
+                    cuello.vertices.push( puntos );
+                }
+            }
+
+            //CREAR LOS MATERIALES            
+			var matPunto = new THREE.PointsMaterial( { color: 0x95FF00, size: 0.1} );
+			
+			//CREAR LOS OBJETOS
+			 cuellito = new THREE.Points( cuello, matPunto );
+			
+			
+			 var tronco = new THREE.Geometry();
+            var zTemp = 0;
+            var res = 80.0;
+            for( var i = -5; i < res; i++){
+                for( var j = -5; j < res; j++){
+                    var puntos = new THREE.Vector3();
+                    puntos.x = (1.5 + i / res ) * Math.cos( ( j *2.0 * Math.PI ) / res) ;
+                    puntos.y = 6+(6.0 * (i / res));
+                    puntos.z = (1.5 +  i / res ) * Math.sin( ( j *2.0 * Math.PI ) / res) ;
+                    
+                    
+                    tronco.vertices.push( puntos );
+                }
+            }
+
+            //CREAR LOS MATERIALES            
+			var matPunto = new THREE.PointsMaterial( { color: 0x95FF00, size: 0.1} );
+			
+			//CREAR LOS OBJETOS
+			  tronquito = new THREE.Points( tronco, matPunto );
+			
+            var cabeza = new THREE.Geometry();
+            var zTemp = 0;
+            var res = 80.0;
+            for( var i = -3; i < res; i++){
+                for( var j = -3; j < res; j++){
+                    var punto = new THREE.Vector3();
+                    punto.x = 3*Math.sin(3 * (res - i) / res )*Math.cos(( j * 3 * Math.PI ) / res);
+                    punto.y =15.4+(3*(Math.sin(3 * ( res -i ) / res )*Math.sin(( j * 3 * Math.PI ) / res)));
+                    punto.z = (3*Math.cos(3 * (res - i) / res ));
+                    
+                  
+                    cabeza.vertices.push( punto );
+                }
+            }
+			
+			//CREAR LOS MATERIALES            
+			var matPunto1 = new THREE.PointsMaterial( { color: 0xffffff, size: 0.1 } );
+			
+			//CREAR LOS OBJETOS
+			 cabecita = new THREE.Points( cabeza, matPunto1 );
+			
+			var hombroderecho = new THREE.Geometry();
+            var zTemp = 0;
+            var res = 50.0;
+            for( var i = -1; i < res; i++){
+                for( var j = -1; j < res; j++){
+                    var punto = new THREE.Vector3();
+                    punto.x = (1*Math.sin(3 * (res - i) / res )*Math.cos(( j * 3 * Math.PI ) / res));
+                    punto.y =11+(1*(Math.sin(3 * ( res -i ) / res )*Math.sin(( j * 3 * Math.PI ) / res)));
+                    punto.z = (-3)+(1*Math.cos(3 * (res - i) / res ));
+                    
+                  
+                    hombroderecho.vertices.push( punto );
+                }
+            }
+			
+			//CREAR LOS MATERIALES            
+			var matPunto1 = new THREE.PointsMaterial( { color: 0xffffff, size: 0.1 } );
+			
+			//CREAR LOS OBJETOS
+			 hombritoR = new THREE.Points( hombroderecho, matPunto1 );
+			
+			var hombroizquierdo = new THREE.Geometry();
+            var zTemp = 0;
+            var res = 50.0;
+            for( var i = -1; i < res; i++){
+                for( var j = -1; j < res; j++){
+                    var punto = new THREE.Vector3();
+                    punto.x = (1*Math.sin(3 * (res - i) / res )*Math.cos(( j * 3 * Math.PI ) / res));
+                    punto.y =11+(1*(Math.sin(3 * ( res -i ) / res )*Math.sin(( j * 3 * Math.PI ) / res)));
+                    punto.z = (3)+(1*Math.cos(3 * (res - i) / res ));
+                    
+                  
+                    hombroizquierdo.vertices.push( punto );
+                }
+            }
+			
+			//CREAR LOS MATERIALES            
+			var matPunto1 = new THREE.PointsMaterial( { color: 0xffffff, size: 0.1 } );
+			
+			//CREAR LOS OBJETOS
+			 hombritoI = new THREE.Points( hombroizquierdo, matPunto1 );
+			
+			var elkotzizizquierdo = new THREE.Geometry();
+            var zTemp = 0;
+            var res = 50.0;
+            for( var i = -1; i < res; i++){
+                for( var j = -1; j < res; j++){
+                    var punto = new THREE.Vector3();
+                    punto.x = (1*Math.sin(3 * (res - i) / res )*Math.cos(( j * 3 * Math.PI ) / res));
+                    punto.y =6+(1*(Math.sin(3 * ( res -i ) / res )*Math.sin(( j * 3 * Math.PI ) / res)));
+                    punto.z = (1.5)+(1*Math.cos(3 * (res - i) / res ));
+                    
+                  
+                   elkotzizizquierdo.vertices.push( punto );
+                }
+            }
+			
+			//CREAR LOS MATERIALES            
+			var matPunto1 = new THREE.PointsMaterial( { color: 0xffffff, size: 0.1 } );
+			
+			//CREAR LOS OBJETOS
+			 kotzizI = new THREE.Points( elkotzizizquierdo, matPunto1 );
+			
+			 
+			 
+			
+			var elkotzizderecho = new THREE.Geometry();
+            var zTemp = 0;
+            var res = 50.0;
+            for( var i = -1; i < res; i++){
+                for( var j = -1; j < res; j++){
+                    var punto = new THREE.Vector3();
+                    punto.x = (1*Math.sin(3 * (res - i) / res )*Math.cos(( j * 3 * Math.PI ) / res));
+                    punto.y =6+(1*(Math.sin(3 * ( res -i ) / res )*Math.sin(( j * 3 * Math.PI ) / res)));
+                    punto.z = (-1.5)+(1*Math.cos(3 * (res - i) / res ));
+                    
+                  
+                   elkotzizderecho.vertices.push( punto );
+                }
+            }
+			
+			//CREAR LOS MATERIALES            
+			var matPunto1 = new THREE.PointsMaterial( { color: 0xffffff, size: 0.1 } );
+			
+			//CREAR LOS OBJETOS
+			 kotzizR = new THREE.Points( elkotzizderecho, matPunto1 );
+			
+			 var musloderecho= new THREE.Geometry();
+            var zTemp = 0;
+            var res = 60.0;
+            for( var i = 1; i < res; i++){
+                for( var j = 0; j < res; j++){
+                    var puntos = new THREE.Vector3();
+                    puntos.x = (0.3 + (i / res) ) * Math.cos( ( j *2.0 * Math.PI ) / res) ;
+                    puntos.y = 3+((3.0) * (i / res));
+                    puntos.z = (1.5)+(0.3 +  i / res ) * Math.sin( ( j *2.0 * Math.PI ) / res) ;
+                    
+                    
+                    musloderecho.vertices.push( puntos );
+                }
+            }
+
+            //CREAR LOS MATERIALES            
+			var matPunto = new THREE.PointsMaterial( { color: 0x95FF00, size: 0.1} );
+			
+			//CREAR LOS OBJETOS
+			 muslitoR = new THREE.Points( musloderecho, matPunto );
+			
+			var musloizquierdo= new THREE.Geometry();
+            var zTemp = 0;
+            var res = 60.0;
+            for( var i = 1; i < res; i++){
+                for( var j = 0; j < res; j++){
+                    var puntos = new THREE.Vector3();
+                    puntos.x = (0.3 + (i / res) ) * Math.cos( ( j *2.0 * Math.PI ) / res) ;
+                    puntos.y = 3+((3.0) * (i / res));
+                    puntos.z = (-1.5)+(0.3 +  i / res ) * Math.sin( ( j *2.0 * Math.PI ) / res) ;
+                    
+                    
+                    musloizquierdo.vertices.push( puntos );
+                }
+            }
+
+            //CREAR LOS MATERIALES            
+			var matPunto = new THREE.PointsMaterial( { color: 0x95FF00, size: 0.1} );
+			
+			//CREAR LOS OBJETOS
+			 muslitoI = new THREE.Points( musloizquierdo, matPunto );
+			 
+			
+			var rodilladerecha = new THREE.Geometry();
+            var zTemp = 0;
+            var res = 40.0;
+            for( var i = -1; i < res; i++){
+                for( var j = -1; j < res; j++){
+                    var punto = new THREE.Vector3();
+                    punto.x = (0.5*Math.sin(3 * (res - i) / res )*Math.cos(( j * 3 * Math.PI ) / res));
+                    punto.y =3+(0.5*(Math.sin(3 * ( res -i ) / res )*Math.sin(( j * 3 * Math.PI ) / res)));
+                    punto.z = (-1.5)+(0.5*Math.cos(3 * (res - i) / res ));
+                    
+                  
+                   rodilladerecha.vertices.push( punto );
+                }
+            }
+			
+			//CREAR LOS MATERIALES            
+			var matPunto1 = new THREE.PointsMaterial( { color: 0xffffff, size: 0.1 } );
+			
+			//CREAR LOS OBJETOS
+			 rodillaR = new THREE.Points( rodilladerecha, matPunto1 );
+			
+			var rodillaizquierda = new THREE.Geometry();
+            var zTemp = 0;
+            var res = 40.0;
+            for( var i = -1; i < res; i++){
+                for( var j = -1; j < res; j++){
+                    var punto = new THREE.Vector3();
+                    punto.x = (0.5*Math.sin(3 * (res - i) / res )*Math.cos(( j * 3 * Math.PI ) / res));
+                    punto.y =3+(0.5*(Math.sin(3 * ( res -i ) / res )*Math.sin(( j * 3 * Math.PI ) / res)));
+                    punto.z = (1.5)+(0.5*Math.cos(3 * (res - i) / res ));
+                    
+                  
+                   rodillaizquierda.vertices.push( punto );
+                }
+            }
+			
+			//CREAR LOS MATERIALES            
+			var matPunto1 = new THREE.PointsMaterial( { color: 0xffffff, size: 0.1 } );
+			
+			//CREAR LOS OBJETOS
+			 rodillaI = new THREE.Points( rodillaizquierda, matPunto1 );
+			
+			var pantorrilladerecha= new THREE.Geometry();
+            var zTemp = 0;
+            var res = 60.0;
+            for( var i = 0; i < res; i++){
+                for( var j = 0; j < res; j++){
+                    var puntos = new THREE.Vector3();
+                    puntos.x = (0.3 + (i / res) ) * Math.cos( ( j *2.0 * Math.PI ) / res) ;
+                    puntos.y = 3+((-3.0) * (i / res));
+                    puntos.z = (-1.5)+(0.3 +  i / res ) * Math.sin( ( j *2.0 * Math.PI ) / res) ;
+                    
+                    
+                   
+                    pantorrilladerecha.vertices.push( puntos );
+                }
+            }
+
+            //CREAR LOS MATERIALES            
+			var matPunto = new THREE.PointsMaterial( { color: 0x95FF00, size: 0.1} );
+			
+			//CREAR LOS OBJETOS
+			 pantoriillaR = new THREE.Points( pantorrilladerecha, matPunto );
+			
+			var pantorrillaL= new THREE.Geometry();
+            var zTemp = 0;
+            var res = 60.0;
+            for( var i = 0; i < res; i++){
+                for( var j = 0; j < res; j++){
+                    var puntos = new THREE.Vector3();
+                    puntos.x = (0.3 + (i / res) ) * Math.cos( ( j *2.0 * Math.PI ) / res) ;
+                    puntos.y = 3+((-3.0) * (i / res));
+                    puntos.z = (1.5)+(0.3 +  i / res ) * Math.sin( ( j *2.0 * Math.PI ) / res) ;
+                    
+                    
+                  
+                    pantorrillaL.vertices.push( puntos );
+                }
+            }
+
+            //CREAR LOS MATERIALES            
+			var matPunto = new THREE.PointsMaterial( { color: 0x95FF00, size: 0.1} );
+			
+			//CREAR LOS OBJETOS
+			 pantoriillaI = new THREE.Points( pantorrillaL, matPunto );
+		  
+		  
+		  var brazoderecho = new THREE.Geometry();
+            var zTemp = 0;
+            var res = 80.0;
+            for( var i = -5; i < res; i++){
+                for( var j = -5; j < res; j++){
+                    var puntos = new THREE.Vector3();
+                    puntos.x = (0.3 + i / res ) * Math.cos( ( j *2.0 * Math.PI ) / res) ;
+                    puntos.y = 7+(4.0 * (i / res));
+                    puntos.z = (-3)+(0.2 +  i / res ) * Math.sin( ( j *2.0 * Math.PI ) / res) ;
+                    
+                    
+                    brazoderecho.vertices.push( puntos );
+                }
+            }
+
+            //CREAR LOS MATERIALES            
+			var matPunto = new THREE.PointsMaterial( { color: 0x95FF00, size: 0.1} );
+			
+			//CREAR LOS OBJETOS
+			 bracitoR = new THREE.Points( brazoderecho, matPunto );
+			
+			var brazoizquierdo = new THREE.Geometry();
+            var zTemp = 0;
+            var res = 80.0;
+            for( var i = -5; i < res; i++){
+                for( var j = -5; j < res; j++){
+                    var puntos = new THREE.Vector3();
+                    puntos.x = (0.3 + i / res ) * Math.cos( ( j *2.0 * Math.PI ) / res) ;
+                    puntos.y = 7+(4.0 * (i / res));
+                    puntos.z = (3)+(0.2 +  i / res ) * Math.sin( ( j *2.0 * Math.PI ) / res) ;
+                    
+                    
+                    brazoizquierdo.vertices.push( puntos );
+                }
+            }
+
+            //CREAR LOS MATERIALES            
+			var matPunto = new THREE.PointsMaterial( { color: 0x95FF00, size: 0.1} );
+			
+			//CREAR LOS OBJETOS
+			 bracitoL = new THREE.Points( brazoizquierdo, matPunto );
+		  
+
+
+
+
+scene.add( gridHelperXZ );
+		  	scene.add( arrowX );	
+		  	scene.add( arrowY );	
+		  	scene.add( arrowZ );	
+			
+			
+			cuellito.add( cabecita );
+			tronquito.add(cuellito);
+			
+			tronquito.add(hombritoR);
+			
+			tronquito.add(hombritoI);
+			
+			
+			tronquito.add(kotzizI);
+           tronquito.add(kotzizR);	   
+		  
+		   
+		   kotzizR.add(muslitoI);
+		   kotzizI.add(muslitoR);
+		   muslitoR.add(rodillaI);
+		   muslitoI.add(rodillaR);
+		   rodillaI.add(pantoriillaI);
+			 rodillaR.add(pantoriillaR);
+			
+			
+			
+			 
+			 
+			 hombritoR.add(bracitoR);
+			 hombritoI.add(bracitoL);
+			 
+			 
+			 scene.add(tronquito);
+			 
+				
+
+			 
+			camera.position.x = 20;
+			camera.position.y = 31;	 
+		  	camera.position.z = 10;
+			
+		  	camera.lookAt( origin );
+
+
+	
+	
+	
+renderer.render( scene, camera );
+
+}
+    
+    function animate() {
+        render();
+        requestAnimationFrame( animate );
+    }
+    
+    function render(){
+         var dtime = Date.now()-startTime;
+		var tx=0, ty=0, tz=0;	//Variables para traslacion
+		var sc = 0;				//Variable para escala
+		var theta=0;			//Variable para ángulo de rotacion de piernas
+		var sigma=0;			//Variable para ángulo de rotación de caderas
+		
+		if(thetaSum>=10*Math.PI/180)
+			positivo = false;
+		if(thetaSum<=-10*Math.PI/180)
+			positivo = true;
+		
+		if(upArrow) {
+			tx=.1; ty=0; tz=0;
+			if(positivo)
+			
+				theta = .1;
+			else
+				theta = -.1;
+		}
+		if(downArrow) {
+			tx=-.1; ty=0; tz=0;
+			if(positivo)
+				theta = .1;
+			else
+				theta = -.1;
+		}
+		thetaSum+=theta;
+		
+		if(rightArrow)
+			sigma = -.1;
+		if(leftArrow)
+			sigma = .1;
+		
+		//MATRIZ DE TRASLACIÓN
+		var t = new THREE.Matrix4();
+		t.set( 	1, 0, 0, tx,
+				0, 1, 0, ty, 
+				0, 0, 1, tz,
+				0, 0, 0, 1	);
+		
+		 	//APLICAR LA TRASLACIÓN A NIVEL LOCAL
+		
+		//ROTACIONES
+		var ct1 = Math.cos(theta);
+		var ct2 = Math.cos(-theta);
+		var cs = Math.cos(sigma);
+		var st1 = Math.sin(theta);
+		var st2 = Math.sin(-theta);
+		var ss = Math.sin(sigma);
+		var r = new THREE.Matrix4();
+		var r1 = new THREE.Matrix4();
+		var r2 = new THREE.Matrix4();
+		
+		
+
+		//MATRIZ DE ROTACIÓN EN EJE Y
+		r.set( 	   cs,  0, ss, 0,
+					0,  1,  0, 0, 
+				  -ss,  0, cs, 0,
+					0,  0,  0, 1 );	
+		//MATRICES DE ROTACIÓN EN EJE LOCAL DE PIERNAS	
+		r1.set( 	ct1,  -st1,  0, 0,
+					st1, ct1,0, 0, 
+					0, 0, 1, 0,
+					0,  0,  0, 1 );	
+					
+					
+		r2.set( 	ct2,  -st2,  0, 0,
+					st2, ct2,0, 0, 
+					0, 0, 1, 0,
+					0,  0,  0, 1 );	
+					
+				
+					
+					
+
+		
+		//ROTACION EN UN EJE PARALELO
+		var tempMatrix = new THREE.Matrix4();
+		tempMatrix.copyPosition(tronquito.matrix );
+		
+		tempMatrix.copyPosition(hombritoI.matrix );
+		tempMatrix.copyPosition(hombritoR.matrix );
+		tempMatrix.copyPosition(kotzizI.matrix );
+		tempMatrix.copyPosition(kotzizR.matrix );
+		
+		tronquito.applyMatrix( new THREE.Matrix4().getInverse(tempMatrix) );
+		
+		hombritoI.applyMatrix( new THREE.Matrix4().getInverse(tempMatrix) );
+		hombritoR.applyMatrix( new THREE.Matrix4().getInverse(tempMatrix) );
+		kotzizI.applyMatrix( new THREE.Matrix4().getInverse(tempMatrix) );
+		kotzizR.applyMatrix( new THREE.Matrix4().getInverse(tempMatrix) );
+		 
+		tronquito.applyMatrix(t);
+		tronquito.applyMatrix(r);
+		tronquito.applyMatrix( tempMatrix );
+
+
+
+hombritoI.applyMatrix(r2);
+hombritoR.applyMatrix(r1);
+
+		kotzizI.applyMatrix(r1);	
+		kotzizR.applyMatrix(r2);
+		
+		
+		
+
+        camera.lookAt( 0, 10, 0 );
+        renderer.render( scene, camera );
+		
+		
+    }
+    </script>
+  </body>
+</html>
