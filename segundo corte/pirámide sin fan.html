@@ -1,0 +1,202 @@
+  <!DOCTYPE html>
+<html>
+  <head>
+    <title>Pirámide a partir de triángulos</title>
+    <style>
+      html, body { margin: 0; padding: 0; overflow: hidden; }
+      #info {
+          position: absolute;
+          padding: 10px;
+          width: 100%;
+          text-align: center;
+          color: #FFFFFF;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="info">Pirámide a partir de triángulos<br/>
+	Kevin Badrán 6000258
+          <br/>
+    </div>
+    <script src="js/three.min.js"></script>
+    <script>
+		var scene, aspect, camera, renderer;
+		var startTime = Date.now();		
+		var upArrow = false;
+		var downArrow = false;
+		var cuadrado;
+		init();
+		animate();
+	
+		function init(){
+			//INICIALIZACIÓN DE LA ESCENA
+			scene = new THREE.Scene();
+			aspect = window.innerWidth / window.innerHeight;
+			camera = new THREE.PerspectiveCamera( 45, aspect, 0.1, 1000);
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+				  			
+			
+			//ELEMENTOS DE ESCENA
+			var size = 10;
+			var arrowSize = 1;
+			var divisions = size;
+			var origin = new THREE.Vector3( 0, 0, 0 );
+			var x = new THREE.Vector3( 1, 0, 0,0 );
+			var y = new THREE.Vector3( 0, 1, 0,0 );
+		  	var z = new THREE.Vector3( 0, 0, 1,0 );
+			var z1 = new THREE.Vector3( 0, 0, 0,1 );
+			var color1 = new THREE.Color( 0xFFFFFF );
+		  	var color2 = new THREE.Color( 0x333333 );
+		  	var colorR = new THREE.Color( 0xAA3333 );
+		  	var colorG = new THREE.Color( 0x33AA33 );
+		  	var colorB = new THREE.Color( 0x333366 );
+			var colorRd = new THREE.Color( 0xAA6666 );
+		  	var colorGd = new THREE.Color( 0x66AA66 );
+		  	var colorBd = new THREE.Color( 0x6666AA );
+		  
+		  	//CREAR LAS GRILLAS PARA EL ESCENARIO
+		  	var axesHelper = new THREE.AxesHelper( size );
+		  	var gridHelperXY = new THREE.GridHelper( size, divisions, color1, color1);
+		  	var gridHelperXZ = new THREE.GridHelper( size, divisions, color2, color2 );
+		  	var gridHelperYZ = new THREE.GridHelper( size, divisions, color2, color2 );
+            
+            //ROTARLAS PARA QUE QUEDEN EN EL ESPACIO ADECUADO
+            gridHelperXY.rotateOnWorldAxis ( x, THREE.Math.degToRad(90) );
+            gridHelperXZ.rotateOnWorldAxis ( y, THREE.Math.degToRad(90) );
+            gridHelperYZ.rotateOnWorldAxis ( z, THREE.Math.degToRad(90) );
+            
+            //CREAR LAS FLECHAS QUE INDICAN LOS EJES DE COORDENADAS 3D
+            var arrowX = new THREE.ArrowHelper( x, origin, arrowSize, colorR );
+            var arrowY = new THREE.ArrowHelper( y, origin, arrowSize, colorG );
+            var arrowZ = new THREE.ArrowHelper( z, origin, arrowSize, colorB );
+			
+			//CREAR LAS GEOMETRÍAS
+	
+var TrianguloMaterial = new THREE.MeshBasicMaterial({
+    color:0xDE0000,
+    side:THREE.DoubleSide
+});
+
+var TrianguloMateria2 = new THREE.MeshBasicMaterial({
+    color:0xE0FF00,
+    side:THREE.DoubleSide
+});
+
+var TrianguloMateria3 = new THREE.MeshBasicMaterial({
+    color:0x0AFF00,
+    side:THREE.DoubleSide
+});
+
+var TrianguloMaterial4 = new THREE.MeshBasicMaterial({
+    color:0x0044FF,
+    side:THREE.DoubleSide
+});
+var TrianguloMaterial5 = new THREE.MeshBasicMaterial({
+    color:0xFFFFFF,
+    side:THREE.DoubleSide
+});
+
+//Lateral 1
+var Triangulo = new THREE.Geometry();
+Triangulo.vertices.push(new THREE.Vector3(1,0, -1));
+Triangulo.vertices.push(new THREE.Vector3( 1,0, 1));
+Triangulo.vertices.push(new THREE.Vector3( 0, 2, 0));
+Triangulo.faces.push(new THREE.Face3(0, 1, 2));
+Triangulito = new THREE.Mesh(Triangulo, TrianguloMaterial);
+Triangulito.position.set(0, 0, 0);
+
+//Lateral 2
+var Triangulo2 = new THREE.Geometry();
+Triangulo2.vertices.push(new THREE.Vector3(-1,0, -1));
+Triangulo2.vertices.push(new THREE.Vector3( -1,0, 1));
+Triangulo2.vertices.push(new THREE.Vector3( 0, 2, 0));
+Triangulo2.faces.push(new THREE.Face3(0, 1, 2));
+Triangulito2 = new THREE.Mesh(Triangulo2, TrianguloMateria2);
+Triangulito2.position.set(0, 0, 0);
+
+//Lateral 3
+var Triangulo3 = new THREE.Geometry();
+Triangulo3.vertices.push(new THREE.Vector3(1,0, 1));
+Triangulo3.vertices.push(new THREE.Vector3( -1,0, 1));
+Triangulo3.vertices.push(new THREE.Vector3( 0, 2, 0));
+Triangulo3.faces.push(new THREE.Face3(0, 1, 2));
+Triangulito3 = new THREE.Mesh(Triangulo3, TrianguloMateria3);
+Triangulito3.position.set(0, 0, 0);
+
+//Lateral 4
+var Triangulo4 = new THREE.Geometry();
+Triangulo4.vertices.push(new THREE.Vector3(1,0, -1));
+Triangulo4.vertices.push(new THREE.Vector3( -1,0, -1));
+Triangulo4.vertices.push(new THREE.Vector3( 0, 2, 0));
+Triangulo4.faces.push(new THREE.Face3(0, 1, 2));
+Triangulito4 = new THREE.Mesh(Triangulo4, TrianguloMaterial4);
+Triangulito4.position.set(0, 0, 0);
+
+//Base
+var Triangulo5 = new THREE.Geometry();
+Triangulo5.vertices.push(new THREE.Vector3(1,0, 1));
+Triangulo5.vertices.push(new THREE.Vector3( -1,0, -1));
+Triangulo5.vertices.push(new THREE.Vector3( -1, 0, 1));
+Triangulo5.faces.push(new THREE.Face3(0, 1, 2));
+Triangulito5 = new THREE.Mesh(Triangulo5, TrianguloMaterial5);
+Triangulito5.position.set(0, 0, 0);
+
+
+var Triangulo6 = new THREE.Geometry();
+Triangulo6.vertices.push(new THREE.Vector3(1,0, 1));
+Triangulo6.vertices.push(new THREE.Vector3( -1,0, -1));
+Triangulo6.vertices.push(new THREE.Vector3( 1, 0, -1));
+Triangulo6.faces.push(new THREE.Face3(0, 1, 2));
+Triangulito6 = new THREE.Mesh(Triangulo6, TrianguloMaterial5);
+Triangulito6.position.set(0, 0, 0);
+
+
+		  	//AGREGAR A LA ESCENA
+            scene.add( gridHelperXZ );
+		  	scene.add( arrowX );	
+		  	scene.add( arrowY );	
+		  	scene.add( arrowZ );	
+			scene.add(Triangulito);
+			scene.add(Triangulito2);
+			scene.add(Triangulito3);
+			scene.add(Triangulito4);
+			scene.add(Triangulito5);
+			scene.add(Triangulito6);
+			
+			//MOVER LA CÁMARA
+			camera.position.x = 10;
+			camera.position.y = 10;	 
+		  	camera.position.z = 10;			
+		  	camera.lookAt( origin );
+			}
+    
+    function animate() {
+        render();
+        requestAnimationFrame( animate );
+		
+		
+    }
+	
+	function addVertices(mesh) {
+            var vertices = mesh.geometry.vertices;
+            var vertexMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+
+            vertices.forEach(function (vertex) {
+                var vertexSphere = new THREE.SphereGeometry(0.05);
+                var vertexMesh = new THREE.Mesh(vertexSphere, vertexMaterial);
+                vertexMesh.position.copy(vertex);
+                scene.add(vertexMesh);
+            });
+        }
+    
+    function render(){
+        var dtime = Date.now()-startTime;
+					
+        camera.lookAt( 0, 0, 0 );
+        renderer.render( scene, camera );
+    }
+    </script>
+  </body>
+</html>

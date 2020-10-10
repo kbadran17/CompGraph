@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>EL SEÑOR MICKEY "DECORACIÓN"</title>
+    <style>
+ html, body { margin: 0; padding: 0; overflow: hidden; }
+            #info {
+                position: absolute;
+                padding: 10px;
+                width: 100%;
+				text-align: center;
+                
+                color: #FFFFFF;
+    </style>
+  </head>
+  <body>
+  <div id="info">EL SEÑOR MICKEY "DECORACIÓN"<br/>
+            Kevin Badrán 6000258<br/>
+			</div>
+    <script src="js/three.js"></script>
+	<script src="js/controls/OrbitControls.js"></script>
+	<script src="js/csg.js"></script>
+	<script src="js/THREE.CSG.js"></script>
+    <script>
+		var scene, aspect, camera, renderer, controls;
+		var path = new THREE.ShapePath();
+
+					
+		init();
+		animate();
+		function init(){
+			//INICIALIZACIÓN
+	        scene = new THREE.Scene();
+	        aspect = window.innerWidth / window.innerHeight;
+	        camera = new THREE.PerspectiveCamera( 75, aspect, 0.1, 1000);
+	        renderer = new THREE.WebGLRenderer();
+	        renderer.setSize( window.innerWidth, window.innerHeight );
+	        document.body.appendChild( renderer.domElement );
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
+			
+			//ELEMENTOS COMUNES
+			var size = 10;
+			var arrowSize = 1;
+			var divisions = size;
+			var origin = new THREE.Vector3( 0, 0, 0 );
+			var x = new THREE.Vector3( 1, 0, 0 );
+			var y = new THREE.Vector3( 0, 1, 0 );
+		  	var z = new THREE.Vector3( 0, 0, 1 );
+		  	var color = new THREE.Color( 0x333333 );
+		  	var colorR = new THREE.Color( 0xAA3333 );
+		  	var colorG = new THREE.Color( 0x33AA33 );
+		  	var colorB = new THREE.Color( 0x333366 );
+			
+		  	//CREAR LAS GRILLAS PARA EL ESCENARIO
+		  	var axesHelper = new THREE.AxesHelper( size );
+			scene.add( axesHelper );
+			
+		  	var gridHelperXZ = new THREE.GridHelper( size, divisions, color, color );
+			scene.add( gridHelperXZ );
+            
+            //ROTARLAS PARA QUE QUEDEN EN EL ESPACIO ADECUADO
+            gridHelperXZ.rotateOnWorldAxis ( y, THREE.Math.degToRad(90) );
+
+            //CREAR ILUMINACIÓN
+            var ambient = new THREE.AmbientLight( 0xffffff, 2 );
+            scene.add( ambient );
+			
+            var pointLight = new THREE.PointLight( 0xffffff, 1, 100 );
+            pointLight.position.set( -5, -2, 5 );
+            scene.add( pointLight );
+			
+            var pointLight = new THREE.PointLight( 0xffffff, .5, 100 );
+            pointLight.position.set( 5, -2, -5 );
+            scene.add( pointLight );
+			
+			//CREAR LAS GEOMETRÍAS
+			
+			var sphereGeometry = new THREE.SphereGeometry( .6, 32, 32 );
+			var sphereGeometry2 = new THREE.SphereGeometry( .3, 32, 32 );
+			var sphereGeometry3 = new THREE.SphereGeometry( .9, 32, 32 );
+			var cilindrogeometry = new THREE.CylinderGeometry( .5, .3, 1, 32 );
+						
+			//CREAR LOS MATERIALES
+            var material1 = new THREE.MeshStandardMaterial( { color: colorR, metalness: 0.5, roughness: 0.1,side:THREE.DoubleSide } );
+			var material2 = new THREE.MeshStandardMaterial( { color: 0xBCBCBC,side:THREE.DoubleSide } );
+			
+			
+			//CREAR LAS MALLAS
+			var sphere1 = new THREE.Mesh( sphereGeometry );
+			var sphere = new THREE.Mesh( sphereGeometry2 );
+			var sphere3 = new THREE.Mesh( sphereGeometry2 );
+			var torso = new THREE.Mesh( sphereGeometry3 );
+			var piecitoL = new THREE.Mesh( cilindrogeometry );
+			var piecitoR = new THREE.Mesh( cilindrogeometry );
+			sphere.translateX( .4 );
+			sphere.translateY( .5 );
+			sphere.translateZ( .4 );
+			
+			sphere3.translateX( -.4 );
+			sphere3.translateY( .5 );
+			sphere3.translateZ( -.4 );
+			
+			
+			torso.translateY(-1.3  );
+			
+			
+			piecitoL.translateX( -.2 );
+			piecitoL.translateY( -2.2 );
+			piecitoL.translateZ( -.2 );
+			
+			piecitoR.translateX( .2 );
+			piecitoR.translateY( -2.2 );
+			piecitoR.translateZ( .2 );
+			
+			//creación curva
+			
+			 var curve2D = [];
+                
+				curve2D[2] = new THREE.Vector2( .4, .4 );
+                curve2D[1] = new THREE.Vector2( .2, .1 );
+				curve2D[0] = new THREE.Vector2( .1, .2 );
+               
+				
+			var shape = new THREE.Shape();
+			shape.moveTo(0,0);
+			shape.splineThru(curve2D);
+            
+            
+            var resolution =5;
+            var points = shape.getPoints( resolution );
+            var geometry = new THREE.BufferGeometry().setFromPoints( points );
+            var curveObject = new THREE.Line( geometry, material2 );
+            
+			//EXTRUDE
+			var extrudeSettings = {
+				steps: 1,
+				amount:0.2,
+				bevelEnabled: false,
+			};
+
+			var geometryExt = new THREE.ExtrudeGeometry( shape, extrudeSettings );			
+			var mesh = new THREE.Mesh( geometryExt, material2 ) ;
+			
+			mesh.translateX(-.4);
+			mesh.translateZ(.35);
+			mesh.rotateY(-.2);
+			
+			
+			
+			var mesh2;
+			mesh2=mesh.clone();
+			mesh2.rotateY(90);
+			mesh2.translateZ(-.15);
+			
+			//FINALIZACIÓN CREACIÓN CURVA 
+			
+			
+			
+			
+			//CONVERTIR A CSG
+			var sphere1CSG = THREE.CSG.fromMesh( sphere1 );
+			var sphereCSG = THREE.CSG.fromMesh( sphere );
+			var sphereCSG2 = THREE.CSG.fromMesh( sphere3 );
+			var torsoCSG = THREE.CSG.fromMesh( torso );
+			var piecitoLCSG = THREE.CSG.fromMesh( piecitoL );
+			var piecitoRCSG = THREE.CSG.fromMesh( piecitoR );
+			var meshCSG = THREE.CSG.fromMesh( mesh );
+			var mesh2CSG = THREE.CSG.fromMesh( mesh2 );
+			
+			//APLICAR LAS OPERACIONES
+			
+			var result = sphere1CSG.union( sphereCSG,sphereCSG2,torsoCSG,piecitoLCSG,piecitoRCSG,meshCSG,mesh2CSG );
+           
+			
+			//CONVERTIR A THREE
+			sphere1 = THREE.CSG.toMesh( result );
+			
+			sphere1.material = material1;
+			sphere.material = material1;
+			sphere3.material = material1;
+			torso.material = material1;
+			piecitoL.material=material1;
+			piecitoR.material=material1;
+			
+			
+			
+			//AGREGAR A LA ESCENA LOS DIFERENTES ELEMENTOS
+     		scene.add( sphere1 );			
+			sphere1.add( sphere3 );
+            sphere1.add( torso );
+            sphere1.add( piecitoL );
+            sphere1.add( piecitoR );
+			sphere1.add( mesh );
+			sphere1.add( mesh2 );
+            sphere1.translateY(2.6);	
+			
+			
+			
+			
+			
+			camera.position.x = -2;
+			camera.position.y = 4;
+		  	camera.position.z = 5;
+			camera.lookAt( 5,5,5 );
+		}
+		function animate(){
+			requestAnimationFrame( animate );
+			controls.update();
+			render();
+		}
+		function render(){
+			renderer.render( scene, camera );
+		}
+    </script>
+  </body>
+</html>

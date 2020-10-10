@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Esfera</title>
+    <style>
+ html, body { margin: 0; padding: 0; overflow: hidden; }
+            #info {
+                position: absolute;
+                padding: 10px;
+                width: 100%;
+				text-align: left;
+                
+                color: #FFFFFF;
+    </style>
+  </head>
+  
+  <body>
+  <div id="info">Creador de primitivas<br/>
+            Kevin Badrán<br/>
+            Jose Pinzón <br/>
+			Hecto Luque<br/>
+            Computación Gráfica<br/>
+			<br>
+			<br>
+			
+			Por favor seleccione <br>
+			la primitiva que desea crear:
+			<br>
+			
+			
+
+
+<a href="cilindro.html"><button name="button">Cilindro</button></a><br>
+<a href="cubo.html"><button name="button">Cubo</button></a><br>
+<a href="piràmide.html"><button name="button">Pirámide</button></a><br>
+<a href="toroide.html"><button name="button">Toroide</button></a><br>
+<a href="esfera.html"><button name="button">Esfera</button></a><br>
+Primitiva creada: Esfera
+
+<br><a href="CreadorPrimitivas.html"><button name="button">Volver al inicio</button></a><br>
+
+</select>
+
+        </div>
+    <script src="js/three.js"></script>
+	<script src="js/controls/OrbitControls.js"></script>
+    <script src='js/libs/dat.gui.min.js'></script>
+    <script src='js/libs/stats.min.js'></script>
+    <script>
+		var scene, aspect, camera, renderer, controls;
+		var startTime = Date.now();
+		var fan;
+		var strip;
+		var radio = 3;
+		var tapa;
+		var cont = 0;
+		var res = 20.0;
+		
+		
+
+		class TRIANGLE_FAN{	
+		  constructor( Geometria ){
+		    this.geometria = Geometria;
+			console.log(this.geometria);
+		  }  
+		  
+		  draw(){			
+			for( var i=2; i<this.geometria.vertices.length; i++ ){
+			  this.geometria.faces.push( new THREE.Face3(0,i,i-1) );
+			}
+			this.geometria.computeFaceNormals();
+			var materialFan = new THREE.MeshStandardMaterial( { color: 0xCC00FF,side:THREE.DoubleSide } );
+			var fan = new THREE.Mesh( this.geometria, materialFan );
+			return fan;
+		  }
+		  
+		  remove(){}
+		}
+		
+		class TRIANGLE_STRIP{	
+		  constructor( Geometria ){
+		    this.geometria = Geometria;
+			console.log(this.geometria);
+		  }  
+		  draw(){			
+			for( var i=2; i<this.geometria.vertices.length; i++ ){
+				if(i%2!=0)
+					this.geometria.faces.push( new THREE.Face3(i-2,i-1,i) );
+				else
+					this.geometria.faces.push( new THREE.Face3(i-2,i,i-1) );
+			}
+			this.geometria.computeFaceNormals();
+			var materialStrip = new THREE.MeshStandardMaterial( { color: 0xCC00FF,side:THREE.DoubleSide } );
+			var strip = new THREE.Mesh( this.geometria, materialStrip );
+			return strip;
+		  }
+		}
+		var esferita=function(){
+		var punto0 = new THREE.Vector3(0,.7,0);	
+            var punto1 = new THREE.Vector3(0,-10.5,0);				
+            var geometria = new THREE.Geometry();
+			var geometria2 = new THREE.Geometry();
+			var geometria3 = new THREE.Geometry();
+			var geometria4 = new THREE.Geometry();
+			var geometria5 = new THREE.Geometry();
+			
+			
+			
+			geometria.vertices.push( punto0 );
+			geometria5.vertices.push( punto1 );
+            for( var i = 0; i <= res; i++){
+                var punto = new THREE.Vector3();
+				var punto2 = new THREE.Vector3();
+				var punto3 = new THREE.Vector3();
+				var punto4 = new THREE.Vector3();
+				punto.x = radio * Math.cos( ( 2 * Math.PI * i )/ res );
+                punto.y = 0;//me da la altura tapa del cilindro
+                punto.z = radio * Math.sin( ( 2 * Math.PI * i )/ res );
+				punto2.x = 1.8*(radio * Math.cos( ( 2 * Math.PI * i )/ res ));
+				punto2.y = -4;//altura base del cilindro
+				punto2.z = 1.8*(radio * Math.sin( ( 2 * Math.PI * i )/ res ));
+				punto3.x=punto2.x;
+				punto3.y=(punto2.y)-1.9;
+				punto3.z=punto2.z;
+				
+				punto4.x =punto.x;
+                punto4.y = (punto3.y)-4;
+                punto4.z =   punto.z;
+				
+				geometria.vertices.push( punto );
+				geometria2.vertices.push( punto );
+				geometria2.vertices.push( punto2 );	
+				geometria3.vertices.push( punto2 );	
+				geometria3.vertices.push( punto3 );	
+				
+				geometria4.vertices.push( punto3 );	
+				geometria4.vertices.push( punto4 );	
+				
+				geometria5.vertices.push(punto4);
+              				
+            }
+			
+			fan = new TRIANGLE_FAN(geometria);
+			tapa1 = fan.draw();
+			tapa1.translateY(10);
+			
+			fan2 = new TRIANGLE_FAN(geometria5);
+			base = fan2.draw();
+			
+			
+			strip = new TRIANGLE_STRIP(geometria2);
+			cuerpo1 = strip.draw();
+			
+			strip2 = new TRIANGLE_STRIP(geometria3);
+			cuerpo2 = strip2.draw();
+			
+			strip3 = new TRIANGLE_STRIP(geometria4);
+			cuerpo3 = strip3.draw();
+			
+			
+			//CREAR LOS MATERIALES
+            var matLinea = new THREE.LineBasicMaterial( { color: 0xFFFFFF } );
+			
+			//CREAR LOS OBJETOS
+			var tapa = new THREE.Line( geometria, matLinea );
+			var c = new THREE.Line( geometria2, matLinea );
+			var u = new THREE.Line( geometria3, matLinea );
+			var e = new THREE.Line( geometria4, matLinea );
+			var r = new THREE.Line( geometria5, matLinea );
+			scene.add( tapa1 );
+			tapa1.add( cuerpo1 );
+			tapa1.add(cuerpo2);
+			tapa1.add(cuerpo3);
+			tapa1.add(base);
+			tapa1.add(tapa);
+			tapa1.add(c);
+			tapa1.add(u);
+			tapa1.add(e);
+			tapa1.add(r);
+		}
+		init();
+		animate();
+	
+		function init(){
+			scene = new THREE.Scene();
+			aspect = window.innerWidth / window.innerHeight;
+			camera = new THREE.PerspectiveCamera( 45, aspect, 0.1, 1000);
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
+            				  
+			var size = 10;
+			var arrowSize = 1;
+			var divisions = size;
+			var origin = new THREE.Vector3( 0, 0, 0 );
+			var x = new THREE.Vector3( 1, 0, 0 );
+			var y = new THREE.Vector3( 0, 1, 0 );
+		  	var z = new THREE.Vector3( 0, 0, 1 );
+			var color1 = new THREE.Color( 0xFFFFFF );
+		  	var color2 = new THREE.Color( 0x333333 );
+		  	var colorR = new THREE.Color( 0xAA3333 );
+		  	var colorG = new THREE.Color( 0x33AA33 );
+		  	var colorB = new THREE.Color( 0x333366 );
+		  
+		  	//CREAR LAS GRILLAS PARA EL ESCENARIO
+		  	var axesHelper = new THREE.AxesHelper( size );
+		  	var gridHelperXY = new THREE.GridHelper( size, divisions, color1, color1);
+		  	var gridHelperXZ = new THREE.GridHelper( size, divisions, color2, color2 );
+		  	var gridHelperYZ = new THREE.GridHelper( size, divisions, color2, color2 );
+            
+            //ROTARLAS PARA QUE QUEDEN EN EL ESPACIO ADECUADO
+            gridHelperXY.rotateOnWorldAxis ( x, THREE.Math.degToRad(90) );
+            gridHelperXZ.rotateOnWorldAxis ( y, THREE.Math.degToRad(90) );
+            gridHelperYZ.rotateOnWorldAxis ( z, THREE.Math.degToRad(90) );
+            
+            //CREAR LAS FLECHAS QUE INDICAN LOS EJES DE COORDENADAS 3D
+            var arrowX = new THREE.ArrowHelper( x, origin, arrowSize, colorR );
+            var arrowY = new THREE.ArrowHelper( y, origin, arrowSize, colorG );
+            var arrowZ = new THREE.ArrowHelper( z, origin, arrowSize, colorB );
+			
+			//CREAR ILUMINACIÓN
+            var ambient = new THREE.AmbientLight( 0xffffff, 2 );
+            scene.add( ambient );
+            
+            var pointLight = new THREE.PointLight( 0xffffff, 1, 100 );
+            pointLight.position.set( 5, 5, -5 );
+            scene.add( pointLight );
+			
+			//CREAR LAS GEOMETRÍAS
+            //Punto
+			esferita();
+		  	//AGREGAR A LA ESCENA			
+			
+            scene.add( gridHelperXZ );
+		  	scene.add( arrowX );	
+		  	scene.add( arrowY );	
+		  	scene.add( arrowZ );	
+			
+            //ANGULOS DE ROTACION
+                var rotationAngles = {
+                    Eje_y: 0,
+                    Eje_x: 0,
+                    Eje_z: 0,
+					Radio: 0,
+					Res:0
+                };
+            var rotation = function () {
+                    angleX = THREE.Math.degToRad(rotationAngles.Eje_y);
+                    angleY = THREE.Math.degToRad(rotationAngles.Eje_x);
+                    angleZ = THREE.Math.degToRad(rotationAngles.Eje_z);
+                    render();
+                };
+				
+            var ChangeRadio = function () {
+			scene.remove(tapa1);
+                   radio=rotationAngles.Radio;
+				  esferita();
+				   
+                };
+				var ChangeDivisions = function () {
+			scene.remove(tapa1);
+                   res=rotationAngles.Res;
+				  esferita();
+				   
+                };
+				
+            var gui = new dat.GUI();
+                gui.add(rotationAngles, "Eje_y", -180, 180, .1).onChange(rotation);
+                gui.add(rotationAngles, "Eje_x", -90, 90, 1).onChange(rotation);
+                gui.add(rotationAngles, "Eje_z", -90, 90, 1).onChange(rotation);
+				
+				
+				
+				gui.add(rotationAngles, "Radio", -8, 8, 1).onChange(ChangeRadio);
+				gui.add(rotationAngles, "Res", 6, 40, 1).onChange(ChangeDivisions);
+
+                rotation();
+                
+            //fin
+			
+			camera.position.x = 20;
+			camera.position.y = 20;	 
+		  	camera.position.z =  20;
+			
+		  	camera.lookAt( origin );
+			}
+    
+    function animate() {
+        render();
+		controls.update(); 
+     
+        requestAnimationFrame( animate );	
+    }
+    
+    function render(){
+        var dtime = Date.now() - startTime;
+        var eulerRot = new THREE.Euler(angleX, angleY, angleZ, 'YZX');
+      tapa1.setRotationFromEuler(eulerRot);
+	   
+        renderer.render( scene, camera );
+        
+    }
+    </script>
+  </body>
+</html>
