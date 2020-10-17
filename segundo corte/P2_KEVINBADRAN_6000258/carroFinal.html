@@ -1,0 +1,477 @@
+<html>
+  <head>
+    <title>Carro final</title>
+    <style>
+ html, body { margin: 0; padding: 0; overflow: hidden; }
+            #info {
+                position: absolute;
+                padding: 10px;
+                width: 100%;
+				text-align: center;
+                
+                color: #FFFFFF;
+    </style>
+  </head>
+  <body>
+  <div id="info">CAROO FINAL<br/>
+            Kevin Badrán 6000258<br/>
+			</div>
+    <script src="js/three.js"></script>
+	<script src="js/controls/OrbitControls.js"></script>
+
+	<script src="js/csg.js"></script>
+	<script src="js/THREE.CSG.js"></script>
+	
+    <script>
+		var scene, aspect, camera, renderer, controls,panoramiceichon,C2T1;
+		var path = new THREE.ShapePath();
+		var fan;
+        var cont = 0;
+		
+
+
+
+
+		
+		var malla1;
+		
+
+		class TRIANGLE_FAN{	
+		  constructor( Geometria15 ){
+		    this.geometria15 = Geometria15;
+			console.log(this.geometria15);
+		  }  
+		  
+		  draw(){			
+			for( var i=2; i<this.geometria15.vertices.length; i++ ){
+			  this.geometria15.faces.push( new THREE.Face3(0,i,i-1) );
+			}
+			this.geometria15.computeFaceNormals();
+			var materialFan = new THREE.MeshStandardMaterial( { color: 0x434343,side:THREE.DoubleSide } );
+			var fan = new THREE.Mesh( this.geometria15, materialFan );
+			return fan;
+		  }
+		  
+		  remove(){}
+		}
+					
+					
+		init();
+		animate();
+		function init(){
+			//INICIALIZACIÓN
+	        scene = new THREE.Scene();
+	        aspect = window.innerWidth / window.innerHeight;
+	        camera = new THREE.PerspectiveCamera( 75, aspect, 0.1, 1000);
+			scene.background = new THREE.Color( 0x7A008D );
+	        renderer = new THREE.WebGLRenderer();
+	        renderer.setSize( window.innerWidth, window.innerHeight );
+	        document.body.appendChild( renderer.domElement );
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
+			
+ 	
+
+
+			
+			//ELEMENTOS COMUNES
+			var size = 100;
+			var arrowSize = 1;
+			var divisions = size;
+			var origin = new THREE.Vector3( 0, 0, 0 );
+			var x = new THREE.Vector3( 1, 0, 0 );
+			var y = new THREE.Vector3( 0, 1, 0 );
+		  	var z = new THREE.Vector3( 0, 0, 1 );
+		  	var color = new THREE.Color( 0x333333 );
+		  	var colorR = new THREE.Color( 0xAA3333 );
+		  	var colorG = new THREE.Color( 0x33AA33 );
+		  	var colorB = new THREE.Color( 0x333366 );
+			
+		  	//CREAR LAS GRILLAS PARA EL ESCENARIO
+		  	var axesHelper = new THREE.AxesHelper( size );
+			scene.add( axesHelper );
+			
+		  	var gridHelperXZ = new THREE.GridHelper( size, divisions, color, color );
+			scene.add( gridHelperXZ );
+            
+            //ROTARLAS PARA QUE QUEDEN EN EL ESPACIO ADECUADO
+            gridHelperXZ.rotateOnWorldAxis ( y, THREE.Math.degToRad(90) );
+
+            //CREAR ILUMINACIÓN
+            var ambient = new THREE.AmbientLight( 0xffffff, 2 );
+            scene.add( ambient );
+			
+            var pointLight = new THREE.PointLight( 0xffffff, 1, 100 );
+            pointLight.position.set( -5, -2, 5 );
+            scene.add( pointLight );
+			
+            var pointLight = new THREE.PointLight( 0xffffff, .5, 100 );
+            pointLight.position.set( 5, -2, -5 );
+            scene.add( pointLight );
+			
+			//CREAR LAS GEOMETRÍAS
+			var geometry = new THREE.TorusGeometry( 2, 0.5, 16, 40 );
+			var geometry2 = new THREE.CylinderGeometry( 2, 2, 1, 32 );
+			var geometry3 = new THREE.SphereGeometry( .8, 32, 32 );
+			var geometry8 = new THREE.BoxBufferGeometry( 3, 3, 9 );
+			
+			
+			//Pirámide retrovisor
+			var punto0 = new THREE.Vector3(0,2,0);			
+            var geometria = new THREE.Geometry();
+			var geometria2 = new THREE.Geometry();
+			var radio = 2.0;
+			var res = 3.0;
+			geometria.vertices.push( punto0 );
+            for( var i = 0; i <= res; i++){
+                var punto = new THREE.Vector3();
+				var punto2 = new THREE.Vector3();
+				punto.x = radio * Math.cos( ( 2 * Math.PI * i )/ res );
+                punto.y = 0;//me da la altura tapa del cilindro
+                punto.z = radio * Math.sin( ( 2 * Math.PI * i )/ res );
+				
+				geometria.vertices.push( punto );
+							
+            }
+			
+			fan = new TRIANGLE_FAN(geometria);
+			malla1 = fan.draw();
+			
+			
+			
+						
+			//CREAR LOS MATERIALES
+            var material1 = new THREE.MeshStandardMaterial( { color: 0x171717,side:THREE.DoubleSide } );
+			var material2 = new THREE.MeshStandardMaterial( { color: 0xFFFFFF,side:THREE.DoubleSide  } );
+			var material3 = new THREE.MeshStandardMaterial( { color: 0x848484,side:THREE.DoubleSide } );
+			var material4 = new THREE.MeshStandardMaterial( { color: 0x848484,side:THREE.DoubleSide, transparent:false, opacity: 0.8 } );
+			var material5 = new THREE.MeshStandardMaterial( { color: 0x5EB4C6,side:THREE.DoubleSide, transparent:true, opacity: 0.8 } );
+			
+			
+			
+			//CREAR LAS MALLAS
+		    var panoramico = new THREE.Mesh( geometry8, material2 );
+			panoramico.rotateZ(.4);
+			panoramico.translateY(3);
+			panoramico.translateX(6);
+			panoramico.translateZ(4);
+			
+			var panoramicotras = new THREE.Mesh( geometry8, material2 );
+			
+			panoramicotras.translateY(7.5);
+			panoramicotras.translateX(-4.5);
+			panoramicotras.rotateZ(-.4);
+		
+			
+			
+			
+			var eje1=new THREE.Mesh( geometry2, material3 );
+			eje1.applyMatrix( new THREE.Matrix4().makeScale(.2,9,.2) );
+			eje1.translateZ(4);
+			eje1.translateX(10);
+			eje1.translateY(.3);
+			eje1.rotateZ(1.56);
+			eje1.rotateX(1.56);
+			
+			var eje2=new THREE.Mesh( geometry2, material3 );
+			eje2.applyMatrix( new THREE.Matrix4().makeScale(.2,9,.2) );
+			eje2.translateZ(4);
+			eje2.translateX(-5.5);
+			eje2.translateY(.3);
+			eje2.rotateZ(1.56);
+			eje2.rotateX(1.56);
+			
+			
+			
+		
+			//creación curva
+			
+			 var curve2D = [];
+                
+				curve2D[0] = new THREE.Vector2( 7, 0 );
+                curve2D[1] = new THREE.Vector2(9, 2 );
+				curve2D[2] = new THREE.Vector2( 11, 2 );
+				curve2D[3] = new THREE.Vector2( 12, 0 );
+				curve2D[4] = new THREE.Vector2( 13, 0 );
+                curve2D[5] = new THREE.Vector2( 14, 1 );
+				curve2D[6] = new THREE.Vector2( 14, 3 );
+				curve2D[7] = new THREE.Vector2( 9,4 );
+				curve2D[8] = new THREE.Vector2( 5, 4 );
+                curve2D[9] = new THREE.Vector2(2, 6 );
+				curve2D[10] = new THREE.Vector2( -4, 5 );
+				curve2D[11] = new THREE.Vector2( -9,4 );
+				curve2D[12] = new THREE.Vector2( -10,4 );
+                curve2D[13] = new THREE.Vector2( -11, 3 );
+				curve2D[14] = new THREE.Vector2( -10, 2 );
+				curve2D[15] = new THREE.Vector2( -10,1 );
+				curve2D[16] = new THREE.Vector2( -9, 0 );
+                curve2D[17] = new THREE.Vector2(-8, 0 );
+				curve2D[18] = new THREE.Vector2( -7, 1 );
+				curve2D[19] = new THREE.Vector2( -6.5, 2 );
+				curve2D[20] = new THREE.Vector2( -5, 2 );
+                curve2D[21] = new THREE.Vector2( -4, 1 );
+				curve2D[22] = new THREE.Vector2( -3, 0 );
+				
+              
+               
+				
+			var shape = new THREE.Shape();
+			shape.splineThru(curve2D);
+            
+            
+            var resolution =5;
+            var points = shape.getPoints( resolution );
+            var geometry6 = new THREE.BufferGeometry().setFromPoints( points );
+            var curveObject = new THREE.Line( geometry6, material1 );
+            
+			//EXTRUDE
+			var extrudeSettings = {
+				steps: 3,
+				amount:8,
+				bevelEnabled: false,
+			};
+
+			var geometryExt = new THREE.ExtrudeGeometry( shape, extrudeSettings );			
+			var carroceria = new THREE.Mesh( geometryExt, material1 ) ;
+			
+			var llanta= new THREE.Mesh( geometry,material1 );
+			llanta.rotateX(1.56);
+			
+			var llantaInterior= new THREE.Mesh( geometry2,material3 );
+			var sphere = new THREE.Mesh( geometry3, material3 );
+			
+			var huequito1= new THREE.Mesh( geometry2,material4 );			
+			huequito1.applyMatrix( new THREE.Matrix4().makeScale(.25,2,.1) );
+			huequito1.translateX(-1.3);
+			
+			var huequito2;
+			huequito2=huequito1.clone();
+			
+			huequito2.translateX(2.3);
+			huequito2.translateZ(.9);
+			huequito2.rotateY(-.7);
+			
+			var huequito3;
+			huequito3=huequito1.clone();
+			huequito3.translateX(2.3);
+			huequito3.translateZ(-.9);
+			huequito3.rotateY(.7);
+			
+			var curva2D = [];
+                
+				curva2D[0] = new THREE.Vector2( -.1, .1 );
+                curva2D[1] = new THREE.Vector2(-.3, .5 );
+				curva2D[2] = new THREE.Vector2( -.6, .6 );
+				curva2D[3] = new THREE.Vector2( -.6, .4 );
+				curva2D[4] = new THREE.Vector2( -.5, .2 );
+                curva2D[5] = new THREE.Vector2( -.4, 0.1 );
+               
+				               
+				
+			var shape2 = new THREE.Shape();
+			shape2.splineThru(curva2D);
+            
+            
+           
+            var points2 = shape.getPoints( resolution );
+            var geometry7 = new THREE.BufferGeometry().setFromPoints( points2 );
+            var curveObject = new THREE.Line( geometry7, material1 );
+            
+			//EXTRUDE
+			var extrudeSettings2 = {
+				steps: 3,
+				amount:20,
+				bevelEnabled: false,
+			};
+
+			var geometryExt2 = new THREE.ExtrudeGeometry( shape2, extrudeSettings2 );			
+			var huecoLateral = new THREE.Mesh( geometryExt2, material2 ) ;
+			huecoLateral.applyMatrix( new THREE.Matrix4().makeScale(2,2,1) );
+			huecoLateral.translateZ(-1.5);
+			huecoLateral.translateY(2);
+			huecoLateral.rotateY(-.2);
+			huecoLateral.rotateX(1.56);
+			
+			var huecoLateral2;
+			huecoLateral2=huecoLateral.clone();
+			huecoLateral2.translateY(3.3);
+			huecoLateral2.translateX(.3);
+			huecoLateral2.rotateZ(1.5);
+			
+				var huecoLateral3;
+			huecoLateral3=huecoLateral.clone();
+			huecoLateral3.translateX(2);
+			huecoLateral3.translateY(2);
+			huecoLateral3.rotateZ(2.1);
+			
+			//VENTANAS PASAJEROS
+			var curveichon2D = [];
+                
+				curveichon2D[0] = new THREE.Vector2( 3.5, 0 );
+                curveichon2D[1] = new THREE.Vector2(1.5, 2 );
+				curveichon2D[2] = new THREE.Vector2( -2, 2 );
+				curveichon2D[3] = new THREE.Vector2( -1, 0 );
+				
+               
+				               
+				
+			var shape3 = new THREE.Shape();
+			shape3.splineThru(curveichon2D);
+            
+            
+           
+            var points3 = shape.getPoints( resolution );
+            var geometry10 = new THREE.BufferGeometry().setFromPoints( points3 );
+            var curveObject = new THREE.Line( geometry10, material1 );
+            
+			//EXTRUDE
+			var extrudeSettings3 = {
+				steps: 3,
+				amount:20,
+				bevelEnabled: false,
+			};
+
+			var geometryExt3 = new THREE.ExtrudeGeometry( shape3, extrudeSettings2 );			
+			var VentanasPasajeros = new THREE.Mesh( geometryExt3, material2 ) ;
+			VentanasPasajeros.translateZ(-4);
+			VentanasPasajeros.translateY(3.2);
+			VentanasPasajeros.translateX(-.7);
+			
+			
+			
+			//CONVERTIR A CSG
+			var llanta1CSG = THREE.CSG.fromMesh( llanta );
+			var llantaInterior1CSG = THREE.CSG.fromMesh( llantaInterior );			
+			var sphereCSG = THREE.CSG.fromMesh( sphere );
+			var huequito1CSG = THREE.CSG.fromMesh( huequito1 );
+			var huequito2CSG = THREE.CSG.fromMesh( huequito2 );
+			var huequito3CSG = THREE.CSG.fromMesh( huequito3 );
+			var huecoLateralCSG = THREE.CSG.fromMesh( huecoLateral );
+			var huecoLateral2CSG = THREE.CSG.fromMesh( huecoLateral2 );
+			var huecoLateral3CSG = THREE.CSG.fromMesh( huecoLateral3 );
+		
+			var carroceriaCSG = THREE.CSG.fromMesh( carroceria );
+			var panoramicoCSG = THREE.CSG.fromMesh( panoramico );		
+var VentanasPasajerosCSG = THREE.CSG.fromMesh( VentanasPasajeros );			
+			var panoramicotrasCSG = THREE.CSG.fromMesh( panoramicotras );			
+			
+			
+			
+			
+			//APLICAR LAS OPERACIONES
+			//LLANTAS
+			var result = llanta1CSG.subtract( llantaInterior1CSG );					
+			var result1 = llantaInterior1CSG.subtract(huequito1CSG ).subtract(huequito2CSG).subtract(huequito3CSG).subtract(huecoLateralCSG).subtract(huecoLateral2CSG).subtract(huecoLateral3CSG);
+			var result2 = result1.union(sphereCSG );
+			
+            var C2T1 = THREE.CSG.toMesh( result );			
+			var C2T2 = THREE.CSG.toMesh( result1 );
+			var C2T3 = THREE.CSG.toMesh( result2 );
+			
+			
+			//CARROCERÍA
+			var  resulteichon=carroceriaCSG.intersect(panoramicoCSG);
+			var  resulteichon2=carroceriaCSG.subtract(panoramicoCSG).subtract(VentanasPasajerosCSG);			
+			var  resulteichon3=carroceriaCSG.intersect(VentanasPasajerosCSG);		
+			
+			var panoramiceichon=THREE.CSG.toMesh( resulteichon );		
+			var panoramiceichon2=THREE.CSG.toMesh( resulteichon2 );
+			var panoramiceichon3=THREE.CSG.toMesh( resulteichon3 );
+		
+			
+			
+
+//           MATERIALES CARROCERÍA
+             panoramiceichon.material=material5;
+             panoramiceichon2.material=material1;
+             panoramiceichon3.material=material5;
+
+
+
+
+			
+			
+			//CONVERTIR A THREE
+			C2T1.material = material1; 
+			C2T2.material = material4;
+			C2T3.material = material4;
+			C2T1.applyMatrix( new THREE.Matrix4().makeScale(.8,1.2,.8) );
+			C2T1.translateX(-5.5);
+			C2T1.translateZ(8);
+			C2T1.rotateZ(-1.56);
+			C2T1.rotateX(-1.56);
+			
+			
+		
+			
+			
+			
+			//AGREGAR A LA ESCENA LOS DIFERENTES ELEMENTOS
+			//LLANTAS
+			panoramiceichon.translateY(1.5);
+			panoramiceichon.translateZ(-4);
+			scene.add(panoramiceichon);		
+				
+				panoramiceichon.add(panoramiceichon2);		
+				panoramiceichon.add(panoramiceichon3);	
+				
+				
+				panoramiceichon.add(C2T1);
+			
+     		
+			C2T1.add(C2T2);
+			C2T1.add(C2T3);
+			var llanta2;
+			llanta2=C2T1.clone();
+			llanta2.translateZ(15.5);
+			panoramiceichon.add(llanta2);
+			
+			var llanta3;
+			llanta3=C2T1.clone();
+			llanta3.translateY(8);
+			panoramiceichon.add(llanta3);
+	
+	        var llanta4;
+			llanta4=llanta2.clone();
+			llanta4.translateY(8);
+			panoramiceichon.add(llanta4);
+
+			
+			
+		malla1.applyMatrix( new THREE.Matrix4().makeScale(.4,.4,.4) );			 	
+		malla1.translateY(3.4);		
+		malla1.translateX(5.5);		
+		malla1.rotateX(-1.56);
+		
+		var malla2;
+           malla2=malla1.clone();
+		   malla2.translateY(-8);	
+		   malla2.rotateX(-3.2);
+		   
+		   
+		   
+		   panoramiceichon.add(eje1);
+		   panoramiceichon.add(eje2);	
+		   panoramiceichon.add( malla1 );
+		   panoramiceichon.add( malla2 );
+		   
+		  //scene.add(panoramicotras);
+			
+			
+			camera.position.x = 15;
+			camera.position.y = 15;
+		  	camera.position.z = 15;
+			camera.lookAt( 5,5,5 );
+		}
+		function animate(){
+			requestAnimationFrame( animate );
+			controls.update();
+			render();
+		}
+		function render(){			
+			
+  renderer.render(scene, camera);
+        
+		}
+    </script>
+  </body>
+</html>

@@ -1,0 +1,169 @@
+<html>
+  <head>
+    <title>1.2 carrocería</title>
+    <style>
+ html, body { margin: 0; padding: 0; overflow: hidden; }
+            #info {
+                position: absolute;
+                padding: 10px;
+                width: 100%;
+				text-align: center;
+                
+                color: #FFFFFF;
+    </style>
+  </head>
+  <body>
+  <div id="info">1.2 carrocería<br/>
+            Kevin Badrán 6000258<br/>
+			</div>
+    <script src="js/three.js"></script>
+	<script src="js/controls/OrbitControls.js"></script>
+	<script src="js/csg.js"></script>
+	<script src="js/THREE.CSG.js"></script>
+    <script>
+		var scene, aspect, camera, renderer, controls;
+		var path = new THREE.ShapePath();
+
+					
+		init();
+		animate();
+		function init(){
+			//INICIALIZACIÓN
+	        scene = new THREE.Scene();
+	        aspect = window.innerWidth / window.innerHeight;
+	        camera = new THREE.PerspectiveCamera( 75, aspect, 0.1, 1000);
+	        renderer = new THREE.WebGLRenderer();
+	        renderer.setSize( window.innerWidth, window.innerHeight );
+	        document.body.appendChild( renderer.domElement );
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
+			
+			//ELEMENTOS COMUNES
+			var size = 10;
+			var arrowSize = 1;
+			var divisions = size;
+			var origin = new THREE.Vector3( 0, 0, 0 );
+			var x = new THREE.Vector3( 1, 0, 0 );
+			var y = new THREE.Vector3( 0, 1, 0 );
+		  	var z = new THREE.Vector3( 0, 0, 1 );
+		  	var color = new THREE.Color( 0x333333 );
+		  	var colorR = new THREE.Color( 0xAA3333 );
+		  	var colorG = new THREE.Color( 0x33AA33 );
+		  	var colorB = new THREE.Color( 0x333366 );
+			
+		  	//CREAR LAS GRILLAS PARA EL ESCENARIO
+		  	var axesHelper = new THREE.AxesHelper( size );
+			scene.add( axesHelper );
+			
+		  	var gridHelperXZ = new THREE.GridHelper( size, divisions, color, color );
+			scene.add( gridHelperXZ );
+            
+            //ROTARLAS PARA QUE QUEDEN EN EL ESPACIO ADECUADO
+            gridHelperXZ.rotateOnWorldAxis ( y, THREE.Math.degToRad(90) );
+
+            //CREAR ILUMINACIÓN
+            var ambient = new THREE.AmbientLight( 0xffffff, 2 );
+            scene.add( ambient );
+			
+            var pointLight = new THREE.PointLight( 0xffffff, 1, 100 );
+            pointLight.position.set( -5, -2, 5 );
+            scene.add( pointLight );
+			
+            var pointLight = new THREE.PointLight( 0xffffff, .5, 100 );
+            pointLight.position.set( 5, -2, -5 );
+            scene.add( pointLight );
+			
+			//CREAR LAS GEOMETRÍAS
+			
+			
+						
+			//CREAR LOS MATERIALES
+            var material1 = new THREE.MeshStandardMaterial( { color: 0x464343,side:THREE.DoubleSide } );
+            
+			
+			
+			
+			//CREAR LAS MALLAS
+		
+			
+			//creación curva
+			
+			 var curve2D = [];
+                
+				curve2D[0] = new THREE.Vector2( 7, 0 );
+                curve2D[1] = new THREE.Vector2(9, 2 );
+				curve2D[2] = new THREE.Vector2( 11, 2 );
+				curve2D[3] = new THREE.Vector2( 12, 0 );
+				curve2D[4] = new THREE.Vector2( 13, 0 );
+                curve2D[5] = new THREE.Vector2( 14, 1 );
+				curve2D[6] = new THREE.Vector2( 14, 3 );
+				curve2D[7] = new THREE.Vector2( 9,4 );
+				curve2D[8] = new THREE.Vector2( 5, 4 );
+                curve2D[9] = new THREE.Vector2(2, 6 );
+				curve2D[10] = new THREE.Vector2( -4, 5 );
+				curve2D[11] = new THREE.Vector2( -9,4 );
+				curve2D[12] = new THREE.Vector2( -10,4 );
+                curve2D[13] = new THREE.Vector2( -11, 3 );
+				curve2D[14] = new THREE.Vector2( -10, 2 );
+				curve2D[15] = new THREE.Vector2( -10,1 );
+				curve2D[16] = new THREE.Vector2( -9, 0 );
+                curve2D[17] = new THREE.Vector2(-8, 0 );
+				curve2D[18] = new THREE.Vector2( -7, 1 );
+				curve2D[19] = new THREE.Vector2( -6.5, 2 );
+				curve2D[20] = new THREE.Vector2( -5, 2 );
+                curve2D[21] = new THREE.Vector2( -4, 1 );
+				curve2D[22] = new THREE.Vector2( -3, 0 );
+				
+              
+               
+				
+			var shape = new THREE.Shape();
+			shape.splineThru(curve2D);
+            
+            
+            var resolution =5;
+            var points = shape.getPoints( resolution );
+            var geometry = new THREE.BufferGeometry().setFromPoints( points );
+            var curveObject = new THREE.Line( geometry, material1 );
+            
+			//EXTRUDE
+			var extrudeSettings = {
+				steps: 3,
+				amount:8,
+				bevelEnabled: false,
+			};
+
+			var geometryExt = new THREE.ExtrudeGeometry( shape, extrudeSettings );			
+			var carroceria = new THREE.Mesh( geometryExt, material1 ) ;
+			
+			//CONVERTIR A CSG			
+			var carroceria1CSG = THREE.CSG.fromMesh( carroceria );
+			//APLICAR LAS OPERACIONES		
+		
+			
+			//CONVERTIR A THREE
+			
+			
+			//AGREGAR A LA ESCENA LOS DIFERENTES ELEMENTOS   	
+		
+           scene.add(carroceria);
+		   
+			
+			
+			
+			
+			camera.position.x = 0;
+			camera.position.y = 15;
+		  	camera.position.z = 25;
+			camera.lookAt( 5,5,5 );
+		}
+		function animate(){
+			requestAnimationFrame( animate );
+			controls.update();
+			render();
+		}
+		function render(){
+			renderer.render( scene, camera );
+		}
+    </script>
+  </body>
+</html>
